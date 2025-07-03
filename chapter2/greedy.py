@@ -42,7 +42,7 @@ def egreedy(env, epsilon, steps):
         r = env.action(a)
         counts[a] += 1
         estimations[a] += r
-        rewards[i] = (estimations / counts).mean()
+        rewards[i] = estimations.sum() / counts.sum()
     return rewards
 
 
@@ -51,16 +51,18 @@ def experiment(env, epsilon, num_runs, steps):
     for r in range(num_runs):
         rewards[r] = egreedy(env, epsilon, steps)
     rewards = rewards.mean(axis=0)
+    print(f"{rewards.shape=}")
     plt.plot(rewards)
 
 
 def main():
-    # np.random.seed(4)
+    np.random.seed(10)
     env = Environment(10)
     print(f"{env.mus=}")
-    for epsilon in [0, 0.1, 0.01]:
-        experiment(env, epsilon=epsilon, num_runs=2000, steps=1000)
-    plt.legend([0, 0.1, 0.01])
+    epsilons = [0, 0.1, 0.01]
+    for epsilon in epsilons:
+        experiment(env, epsilon=epsilon, num_runs=200, steps=1000)
+    plt.legend(epsilons)
     # plt.ylim(0, 2)
     plt.show()
 
