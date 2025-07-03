@@ -1,3 +1,6 @@
+import matplotlib as mpl
+
+mpl.use("Qt5Agg")  # <- important to call before any other mpl imports/inits
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -25,40 +28,40 @@ def create_violinplot(env, reps=500):
     plt.show()
 
 
-def egreedy(env, epsilon=0.1, steps=1000):
+def egreedy(env, epsilon, steps):
     k = env.num_arms()
     estimations = np.zeros(k)
     # estimations = np.array([-np.inf for _ in range(k)])
     counts = np.zeros(k)
-    rewards = []
-    for _ in range(steps):
+    rewards = np.zeros(steps)
+    for i in range(steps):
         if np.random.uniform() < epsilon:
             a = np.random.randint(k)
         else:
             a = np.argmax(estimations / counts)
         r = env.action(a)
-        rewards.append(r)
+        rewards[i] = r
         counts[a] += 1
         estimations[a] += r
-    return np.array(rewards)
+    return rewards
 
 
-def experiment(env, epsilon, num_runs=2000):
-    rewards = []
-    for _ in range(num_runs):
-        r = egreedy(env, epsilon)
-        rewards.append(r)
+def experiment(env, epsilon, num_runs=2000, steps=1000):
+    rewards = np.zeros([num_runs, steps])
+    for r in range(num_runs):
+        rewards[r] = egreedy(env, epsilon, steps)
     rewards = np.vstack(rewards)
     rewards = rewards.mean(axis=0)
     plt.plot(rewards)
 
 
 def main():
+    np.random.seed(0)
     env = Environment(10)
-    experiment(env, 0)
-    experiment(env, 0.1)
-    experiment(env, 0.01)
+    for epsilon in [0, 0.1, 0.01]:
+        experiment(env, epsilon=epsilon, num_runs=2000)
     plt.legend([0, 0.1, 0.01])
+    plt.ylim(0, 1.6)
     plt.show()
 
 
