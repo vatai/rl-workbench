@@ -25,24 +25,41 @@ def create_violinplot(env, reps=500):
     plt.show()
 
 
-def main():
-    env = Environment(10)
-    # create_violinplot(env)
-
+def egreedy(env, epsilon=0.1, steps=1000):
     k = env.num_arms()
-    estimations = np.array([-np.inf for _ in range(k)])
+    estimations = np.zeros(k)
+    # estimations = np.array([-np.inf for _ in range(k)])
     counts = np.zeros(k)
-
-    steps = 1000
-    epsilon = 0.1
+    rewards = []
     for _ in range(steps):
         if np.random.uniform() < epsilon:
-            a = np.random.random_integers(0, 9)
+            a = np.random.randint(k)
         else:
             a = np.argmax(estimations / counts)
         r = env.action(a)
+        rewards.append(r)
         counts[a] += 1
         estimations[a] += r
+    return np.array(rewards)
+
+
+def experiment(env, epsilon, num_runs=2000):
+    rewards = []
+    for _ in range(num_runs):
+        r = egreedy(env, epsilon)
+        rewards.append(r)
+    rewards = np.vstack(rewards)
+    rewards = rewards.mean(axis=0)
+    plt.plot(rewards)
+
+
+def main():
+    env = Environment(10)
+    experiment(env, 0)
+    experiment(env, 0.1)
+    experiment(env, 0.01)
+    plt.legend([0, 0.1, 0.01])
+    plt.show()
 
 
 main()
