@@ -40,28 +40,28 @@ def egreedy(env, epsilon, steps):
         else:
             a = np.argmax(estimations / counts)
         r = env.action(a)
-        rewards[i] = r
         counts[a] += 1
         estimations[a] += r
+        rewards[i] = (estimations / counts).mean()
     return rewards
 
 
-def experiment(env, epsilon, num_runs=2000, steps=1000):
+def experiment(env, epsilon, num_runs, steps):
     rewards = np.zeros([num_runs, steps])
     for r in range(num_runs):
         rewards[r] = egreedy(env, epsilon, steps)
-    rewards = np.vstack(rewards)
     rewards = rewards.mean(axis=0)
     plt.plot(rewards)
 
 
 def main():
-    np.random.seed(0)
+    # np.random.seed(4)
     env = Environment(10)
+    print(f"{env.mus=}")
     for epsilon in [0, 0.1, 0.01]:
-        experiment(env, epsilon=epsilon, num_runs=2000)
+        experiment(env, epsilon=epsilon, num_runs=2000, steps=1000)
     plt.legend([0, 0.1, 0.01])
-    plt.ylim(0, 1.6)
+    # plt.ylim(0, 2)
     plt.show()
 
 
